@@ -8,18 +8,25 @@ export interface QuizAnswerState {
   correct: boolean
 }
 
+/** Returns tutor blocks from the live backend, or null to fall back to the script. */
+export type LiveSend = (
+  text: string,
+) => Promise<{ blocks: ChatMsg['blocks']; chips?: ChatMsg['chips'] } | null>
+
 export function useTutorEngine({
   topicId,
   title,
   initialQuery,
   onEffect,
   onNavigateIntent,
+  liveSend,
 }: {
   topicId: string
   title: string
   initialQuery?: string
   onEffect: (e: ScriptEffect) => void
   onNavigateIntent: (intent: string) => void
+  liveSend?: LiveSend
 }) {
   const [messages, setMessages] = useState<ChatMsg[]>([])
   const [typing, setTyping] = useState<string | null>(null)
@@ -87,9 +94,34 @@ export function useTutorEngine({
       const t = text.trim()
       if (!t) return
       setMessages((prev) => [...prev, { id: uid('msg'), role: 'student', text: t }])
-      later(() => advance(script.current.route(t)), 250)
+
+      const routed = script.current.route(t)
+      // Free-text questions the script can't answer well go to the live tutor
+      // when a backend is reachable; anything else stays on the scripted path.
+      if (liveSend && routed === 'fallback') {
+        setTyping('Thinking…')
+        void liveSend(t)
+          .then((res) => {
+            setTyping(null)
+            if (!res) {
+              advance(routed)
+              return
+            }
+            setMessages((prev) => [
+              ...prev,
+              { id: uid('msg'), role: 'tutor', blocks: res.blocks, chips: res.chips },
+            ])
+          })
+          .catch(() => {
+            setTyping(null)
+            advance(routed)
+          })
+        return
+      }
+
+      later(() => advance(routed), 250)
     },
-    [advance, later],
+    [advance, later, liveSend],
   )
 
   const answerQuiz = useCallback(

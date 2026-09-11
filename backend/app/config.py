@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     anthropic_model: str = "claude-sonnet-5"
+    # Required only when the Anthropic key is org-level rather than workspace-scoped.
+    anthropic_workspace_id: str = ""
 
     ai_mode: str = "auto"  # mock | live | auto
     cross_check: bool = False

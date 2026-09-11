@@ -4,6 +4,8 @@
 
 ## The golden path
 
+0. **Landing page** (`/welcome`) — one line on what StudyOS is, then **Get started** →
+   sign in with Google, an email account, or **Continue as demo learner** (fastest for judging).
 1. **Home** — point at *Today's Mission: Precision & Recall* ("the app always answers: what should
    I do now?"). Note the violet strip: *"Adapted for you — recall questions tripped you up on
    Tuesday"* → the system knows the learner.

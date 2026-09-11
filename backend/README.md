@@ -69,6 +69,7 @@ Copy `.env.example` to `.env` and adjust. All are optional — defaults run out 
 | `ANTHROPIC_API_KEY` | *(empty)* | Anthropic key (deep reasoning/evaluation) |
 | `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model id |
 | `ANTHROPIC_MODEL` | `claude-sonnet-5` | Anthropic model id |
+| `ANTHROPIC_WORKSPACE_ID` | *(empty)* | Only for org-level Anthropic keys — workspace-scoped keys don't need it |
 | `AI_MODE` | `auto` | `mock` \| `live` \| `auto` (auto = live iff keys present) |
 | `CROSS_CHECK` | `false` | GPT→Claude review for deep evaluation tasks (costlier) |
 | `EMBEDDING_PROVIDER` | `auto` | `auto` \| `mock` \| `openai` |

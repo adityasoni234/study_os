@@ -17,9 +17,24 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The prototype is fully interactive with realistic mock data and a
-scripted adaptive tutor — no backend required for the demo. Demo state (mastery, mission progress,
-saved items) persists in `localStorage`; reset it any time in **Settings → Reset demo data**.
+Open http://localhost:5173. You'll land on the marketing page, then sign in.
+The prototype is fully interactive with realistic mock data and a scripted adaptive tutor — no
+backend required for the demo. Learning state (mastery, mission progress, saved items) persists in
+`localStorage`; reset it any time in **Settings → Reset demo data**.
+
+### Authentication
+
+Sign-in uses **Firebase Authentication** (email/password, Google, or anonymous "demo learner").
+Copy `.env.example` to `.env` and fill in your Firebase web config:
+
+```bash
+cp .env.example .env   # then paste your VITE_FIREBASE_* values
+```
+
+In the Firebase console enable **Email/Password**, **Google**, and **Anonymous** under
+Authentication → Sign-in method, and add your domain under Authorized domains.
+Without a `.env`, the app still runs — auth falls back to a local demo session, so the
+demo never blocks.
 
 ## Run the backend
 
@@ -35,6 +50,14 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 ## Demo flow (what to show judges)
 
 The polished golden path lives in [DEMO.md](DEMO.md).
+
+## How the two halves connect
+
+The UI talks to the backend through one isolated module — [`src/services/api.ts`](src/services/api.ts).
+Nothing else in the app calls `fetch`, so pointing at a different backend is a one-file change.
+Every call degrades gracefully: if the API isn't reachable, screens fall back to the built-in mock
+experience. Today the tutor sends **free-text questions** to the live backend (real retrieval,
+real citations, real mastery updates) while the scripted golden path stays deterministic for demos.
 
 ## Product map
 

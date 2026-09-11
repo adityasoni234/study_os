@@ -18,9 +18,10 @@ import {
   Wrench,
   X,
 } from 'lucide-react'
-import type { ChatMsg, InlineQuiz, ScriptEffect } from '@/types'
+import type { ChatMsg, InlineQuiz, ScriptEffect, TutorBlock } from '@/types'
 import { topicTitle } from '@/data/roadmaps'
-import { useTutorEngine, type QuizAnswerState } from '@/components/tutor/engine'
+import { useTutorEngine, type LiveSend, type QuizAnswerState } from '@/components/tutor/engine'
+import { api, backendAvailable } from '@/services/api'
 import { Blocks } from '@/components/tutor/blocks'
 import { useApp } from '@/state/AppContext'
 import { cn } from '@/lib/utils'
@@ -190,12 +191,37 @@ export default function TutorSession() {
     [navigate, topicId],
   )
 
+  // Live tutor for free-text questions; silently unused when no backend is running.
+  const sessionId = useRef<string | null>(null)
+  const liveSend = useCallback<LiveSend>(async (text) => {
+    if (!(await backendAvailable())) return null
+    const res = await api.tutorMessage({
+      sessionId: sessionId.current,
+      topicId: topicId === 'ask' ? null : topicId,
+      message: text,
+    })
+    sessionId.current = res.sessionId
+    const blocks: TutorBlock[] = [{ kind: 'p', text: res.reply.text }]
+    for (const c of res.reply.citations ?? []) {
+      blocks.push({ kind: 'cite', label: `${c.title}${c.page != null ? ` · p.${c.page}` : ''}` })
+    }
+    return {
+      blocks,
+      chips: (res.reply.suggestions ?? []).slice(0, 3).map((label, i) => ({
+        label,
+        to: 'fallback',
+        primary: i === 0,
+      })),
+    }
+  }, [topicId])
+
   const engine = useTutorEngine({
     topicId,
     title,
     initialQuery: params.get('q') ?? undefined,
     onEffect,
     onNavigateIntent,
+    liveSend,
   })
 
   // Auto-scroll on new content.

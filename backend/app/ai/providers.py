@@ -165,6 +165,9 @@ class AnthropicProvider(_HttpProvider):
             "x-api-key": settings.anthropic_api_key,
             "anthropic-version": _ANTHROPIC_VERSION,
         }
+        # Org-level keys (not scoped to a workspace) must name the workspace.
+        if settings.anthropic_workspace_id:
+            headers["anthropic-workspace-id"] = settings.anthropic_workspace_id
         started = time.perf_counter()
         data = self._post(_ANTHROPIC_URL, headers, payload)
         latency_ms = int((time.perf_counter() - started) * 1000)
