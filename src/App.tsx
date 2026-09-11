@@ -1,8 +1,10 @@
 import { Component, type ReactNode } from 'react'
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
-import { AppProvider } from '@/state/AppContext'
+import { AppProvider, useApp } from '@/state/AppContext'
 import { AppShell } from '@/components/layout/AppShell'
+import Landing from '@/pages/Landing'
+import Auth from '@/pages/Auth'
 import Home from '@/pages/Home'
 import Roadmaps from '@/pages/Roadmaps'
 import RoadmapDetail from '@/pages/RoadmapDetail'
@@ -52,6 +54,16 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
+/** Sends signed-out visitors to the landing page, preserving where they were headed. */
+function RequireAuth() {
+  const { state } = useApp()
+  const location = useLocation()
+  if (!state.auth.authed) {
+    return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
+  }
+  return <Outlet />
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
@@ -67,23 +79,27 @@ export default function App() {
         <ErrorBoundary>
           <ScrollToTop />
           <Routes>
-            <Route path="/reset" element={<Reset />} />
-            <Route element={<AppShell />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/roadmaps" element={<Roadmaps />} />
-              <Route path="/roadmaps/:id" element={<RoadmapDetail />} />
-              <Route path="/tutor" element={<TutorHub />} />
-              <Route path="/tutor/:topicId" element={<TutorSession />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/quiz/:topicId" element={<Quiz />} />
-              <Route path="/notebook" element={<Notebook />} />
-              <Route path="/growth" element={<Growth />} />
-              <Route path="/opportunities" element={<Opportunities />} />
-              <Route path="/opportunities/:id/prepare" element={<PrepareMe />} />
-              <Route path="/wellbeing" element={<Wellbeing />} />
-              <Route path="/inner-growth" element={<InnerGrowth />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<NotFound />} />
+            <Route path="/welcome" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route element={<RequireAuth />}>
+              <Route path="/reset" element={<Reset />} />
+              <Route element={<AppShell />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/roadmaps" element={<Roadmaps />} />
+                <Route path="/roadmaps/:id" element={<RoadmapDetail />} />
+                <Route path="/tutor" element={<TutorHub />} />
+                <Route path="/tutor/:topicId" element={<TutorSession />} />
+                <Route path="/quiz" element={<Quiz />} />
+                <Route path="/quiz/:topicId" element={<Quiz />} />
+                <Route path="/notebook" element={<Notebook />} />
+                <Route path="/growth" element={<Growth />} />
+                <Route path="/opportunities" element={<Opportunities />} />
+                <Route path="/opportunities/:id/prepare" element={<PrepareMe />} />
+                <Route path="/wellbeing" element={<Wellbeing />} />
+                <Route path="/inner-growth" element={<InnerGrowth />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Route>
           </Routes>
         </ErrorBoundary>

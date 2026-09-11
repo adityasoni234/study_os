@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-type Variant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'violet' | 'mint' | 'danger'
+type Variant = 'primary' | 'secondary' | 'soft' | 'ghost' | 'violet' | 'mint' | 'danger' | 'light'
 type Size = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
@@ -13,6 +13,8 @@ const variants: Record<Variant, string> = {
   violet: 'bg-violet text-white hover:bg-[#6c4be0]',
   mint: 'bg-mint text-white hover:bg-[#0e8069]',
   danger: 'bg-coral-soft text-coral-ink hover:bg-[#f7e0dc]',
+  /** For use on saturated/dark surfaces. */
+  light: 'bg-white text-indigo-ink hover:bg-white/90 shadow-(--shadow-soft)',
 }
 
 const sizes: Record<Size, string> = {

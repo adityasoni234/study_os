@@ -180,7 +180,7 @@ export const mindNodes: MindNode[] = [
 
   { id: 'eval', label: 'Model Evaluation', x: 655, y: 138, kind: 'branch', tone: 'mint', parent: 'ml' },
   { id: 'cm', label: 'Confusion Matrix', x: 782, y: 58, kind: 'leaf', tone: 'mint', mastery: 88, parent: 'eval', summary: 'The 2×2 table every classification metric is built from.', topicId: 'confusion-matrix' },
-  { id: 'pr', label: 'Precision & Recall', x: 812, y: 158, kind: 'leaf', tone: 'indigo', mastery: 65, parent: 'eval', summary: 'False alarms vs. misses — today’s mission topic.', topicId: 'precision-recall' },
+  { id: 'pr', label: 'Precision & Recall', x: 788, y: 158, kind: 'leaf', tone: 'indigo', mastery: 65, parent: 'eval', summary: 'False alarms vs. misses — today’s mission topic.', topicId: 'precision-recall' },
   { id: 'roc', label: 'ROC Curves', x: 775, y: 248, kind: 'leaf', tone: 'amber', mastery: 12, parent: 'eval', summary: 'Precision-recall thinking drawn as a picture. Up next.', topicId: 'roc-curves' },
 
   { id: 'opt', label: 'Optimization', x: 640, y: 400, kind: 'branch', tone: 'amber', parent: 'ml' },

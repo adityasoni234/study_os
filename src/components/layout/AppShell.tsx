@@ -12,8 +12,9 @@ import {
   Sprout,
 } from 'lucide-react'
 import { Logo } from '@/lib/icons'
-import { cn } from '@/lib/utils'
+import { cn, firstName, initials } from '@/lib/utils'
 import { Toasts } from '@/components/ui/Toasts'
+import { useApp } from '@/state/AppContext'
 
 const primaryNav = [
   { to: '/', label: 'Home', icon: Home },
@@ -59,8 +60,10 @@ function SideLink({
 
 export function AppShell() {
   const location = useLocation()
+  const { state } = useApp()
   const inTutorSession = matchPath('/tutor/:topicId', location.pathname) != null
   const hideMobileChrome = inTutorSession
+  const name = state.auth.name
 
   return (
     <div className="min-h-dvh">
@@ -97,10 +100,12 @@ export function AppShell() {
             }
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo to-violet text-[12.5px] font-bold text-white">
-              A
+              {initials(name)}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] leading-tight font-semibold">Aditya</span>
+              <span className="block truncate text-[13px] leading-tight font-semibold">
+                {firstName(name)}
+              </span>
               <span className="flex items-center gap-1 text-[11px] font-medium text-amber-ink">
                 <Flame size={11} /> 12-day streak
               </span>
@@ -125,7 +130,7 @@ export function AppShell() {
             aria-label="Profile & settings"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo to-violet text-[12px] font-bold text-white"
           >
-            A
+            {initials(name)}
           </Link>
         </header>
       )}

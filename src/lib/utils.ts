@@ -42,6 +42,15 @@ export function rich(text: string): ReactNode {
   )
 }
 
+export function firstName(full: string): string {
+  return (full.trim() || 'Aditya').split(/\s+/)[0]
+}
+
+export function initials(full: string): string {
+  const parts = (full.trim() || 'Aditya').split(/\s+/).slice(0, 2)
+  return parts.map((p) => p[0]?.toUpperCase() ?? '').join('')
+}
+
 export function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n))
 }

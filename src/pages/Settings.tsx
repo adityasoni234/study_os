@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { Flame, Globe, RotateCcw, ShieldCheck } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Flame, Globe, LogOut, RotateCcw, ShieldCheck } from 'lucide-react'
 import { Page, PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Card, SectionHeader } from '@/components/ui/Card'
 import { Segmented } from '@/components/ui/Segmented'
 import { useApp } from '@/state/AppContext'
+import { initials } from '@/lib/utils'
 
 export default function Settings() {
-  const { resetDemo, toast } = useApp()
+  const { state, resetDemo, signOut, toast } = useApp()
+  const navigate = useNavigate()
   const [style, setStyle] = useState<'Simple' | 'Visual' | 'Technical'>('Visual')
   const [goal, setGoal] = useState<'15' | '25' | '45'>('25')
   const [confirmReset, setConfirmReset] = useState(false)
@@ -18,11 +21,11 @@ export default function Settings() {
 
       <Card className="flex items-center gap-4">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo to-violet text-[20px] font-bold text-white">
-          A
+          {initials(state.auth.name)}
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[16px] font-semibold">Aditya Soni</div>
-          <div className="text-[12.5px] text-ink-soft">adityaksoni234@gmail.com</div>
+          <div className="text-[16px] font-semibold">{state.auth.name}</div>
+          <div className="text-[12.5px] text-ink-soft">Learner · StudyOS</div>
         </div>
         <span className="flex items-center gap-1.5 rounded-full bg-amber-soft px-3 py-1.5 text-[12px] font-semibold text-amber-ink">
           <Flame size={13} /> 12-day streak
@@ -99,6 +102,24 @@ export default function Settings() {
               <RotateCcw size={13} /> Reset
             </Button>
           )}
+        </Card>
+        <Card className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-[13.5px] font-semibold">Sign out</div>
+            <div className="text-[12.5px] text-ink-soft">
+              Your progress stays saved on this device.
+            </div>
+          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              signOut()
+              navigate('/welcome')
+            }}
+          >
+            <LogOut size={13} /> Sign out
+          </Button>
         </Card>
       </section>
 

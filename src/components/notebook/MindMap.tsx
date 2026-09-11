@@ -71,7 +71,7 @@ export function MindMap() {
                 transform={`translate(${n.x - w / 2}, ${n.y - h / 2})`}
                 onClick={() => setSelectedId(n.id)}
                 className="cursor-pointer"
-                style={{ animation: `fade-up 0.5s ${i * 0.04}s cubic-bezier(0.22,1,0.36,1) both` }}
+                style={{ animation: `fade-in 0.6s ${i * 0.05}s ease both` }}
               >
                 <rect
                   width={w}

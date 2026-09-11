@@ -27,7 +27,7 @@ import { useApp } from '@/state/AppContext'
 import { roadmaps } from '@/data/roadmaps'
 import { opportunities } from '@/data/opportunities'
 import { toneSoftBg, toneText } from '@/lib/tones'
-import { cn, timeGreeting, todayLabel } from '@/lib/utils'
+import { cn, firstName, timeGreeting, todayLabel } from '@/lib/utils'
 
 function Journeys() {
   const { state, roadmapProgress } = useApp()
@@ -254,7 +254,7 @@ export default function Home() {
         <div>
           <div className="text-[12.5px] font-medium text-ink-faint">{todayLabel()}</div>
           <h1 className="mt-1 font-display text-[28px] leading-tight font-semibold tracking-[-0.01em] lg:text-[32px]">
-            {timeGreeting()}, Aditya <span className="inline-block">👋</span>
+            {timeGreeting()}, {firstName(state.auth.name)} <span className="inline-block">👋</span>
           </h1>
           <p className="mt-1 text-[14.5px] text-ink-soft">
             {allDone ? 'Today’s mission is done — momentum looks great.' : 'Let’s make today count.'}
