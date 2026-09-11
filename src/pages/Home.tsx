@@ -255,9 +255,11 @@ export default function Home() {
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-[12.5px] font-medium text-ink-faint">{todayLabel()}</div>
-          <h1 className="mt-1 font-display text-[28px] leading-tight font-semibold tracking-[-0.01em] lg:text-[32px]">
-            {timeGreeting()}, {firstName(user?.name ?? 'Aditya')}{' '}
-            <span className="inline-block">👋</span>
+          <h1 className="mt-1 font-display text-[25px] leading-tight font-semibold tracking-[-0.01em] sm:text-[28px] lg:text-[32px]">
+            {timeGreeting()},{' '}
+            <span className="whitespace-nowrap">
+              {firstName(user?.name ?? 'Aditya')} <span className="inline-block">👋</span>
+            </span>
           </h1>
           <p className="mt-1 text-[14.5px] text-ink-soft">
             {allDone ? 'Today’s mission is done — momentum looks great.' : 'Let’s make today count.'}
