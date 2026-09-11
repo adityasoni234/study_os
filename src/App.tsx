@@ -1,7 +1,9 @@
 import { Component, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
-import { AppProvider, useApp } from '@/state/AppContext'
+import { AppProvider } from '@/state/AppContext'
+import { AuthProvider, useAuth } from '@/state/AuthContext'
+import { Logo } from '@/lib/icons'
 import { AppShell } from '@/components/layout/AppShell'
 import Landing from '@/pages/Landing'
 import Auth from '@/pages/Auth'
@@ -56,9 +58,20 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 /** Sends signed-out visitors to the landing page, preserving where they were headed. */
 function RequireAuth() {
-  const { state } = useApp()
+  const { status } = useAuth()
   const location = useLocation()
-  if (!state.auth.authed) {
+
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-paper">
+        <span className="gentle-float">
+          <Logo size={40} />
+        </span>
+        <span className="text-[13px] font-medium text-ink-faint">Opening your learning space…</span>
+      </div>
+    )
+  }
+  if (status === 'guest') {
     return <Navigate to="/welcome" replace state={{ from: location.pathname }} />
   }
   return <Outlet />
@@ -74,8 +87,9 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <BrowserRouter>
+    <AuthProvider>
+      <AppProvider>
+        <BrowserRouter>
         <ErrorBoundary>
           <ScrollToTop />
           <Routes>
@@ -102,8 +116,9 @@ export default function App() {
               </Route>
             </Route>
           </Routes>
-        </ErrorBoundary>
-      </BrowserRouter>
-    </AppProvider>
+          </ErrorBoundary>
+        </BrowserRouter>
+      </AppProvider>
+    </AuthProvider>
   )
 }

@@ -24,6 +24,7 @@ import { ProgressBar, Ring } from '@/components/ui/Progress'
 import { Badge } from '@/components/ui/Badge'
 import { RoadmapIcon } from '@/lib/icons'
 import { useApp } from '@/state/AppContext'
+import { useAuth } from '@/state/AuthContext'
 import { roadmaps } from '@/data/roadmaps'
 import { opportunities } from '@/data/opportunities'
 import { toneSoftBg, toneText } from '@/lib/tones'
@@ -237,6 +238,7 @@ function WellbeingNudge() {
 
 export default function Home() {
   const { state } = useApp()
+  const { user } = useAuth()
   const m = state.mission
   const allDone = m.learn && m.practice && m.check
 
@@ -254,7 +256,8 @@ export default function Home() {
         <div>
           <div className="text-[12.5px] font-medium text-ink-faint">{todayLabel()}</div>
           <h1 className="mt-1 font-display text-[28px] leading-tight font-semibold tracking-[-0.01em] lg:text-[32px]">
-            {timeGreeting()}, {firstName(state.auth.name)} <span className="inline-block">👋</span>
+            {timeGreeting()}, {firstName(user?.name ?? 'Aditya')}{' '}
+            <span className="inline-block">👋</span>
           </h1>
           <p className="mt-1 text-[14.5px] text-ink-soft">
             {allDone ? 'Today’s mission is done — momentum looks great.' : 'Let’s make today count.'}

@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/Button'
 import { Card, SectionHeader } from '@/components/ui/Card'
 import { Segmented } from '@/components/ui/Segmented'
 import { useApp } from '@/state/AppContext'
+import { useAuth } from '@/state/AuthContext'
 import { initials } from '@/lib/utils'
 
 export default function Settings() {
-  const { state, resetDemo, signOut, toast } = useApp()
+  const { resetDemo, toast } = useApp()
+  const { user, signOut, live } = useAuth()
   const navigate = useNavigate()
   const [style, setStyle] = useState<'Simple' | 'Visual' | 'Technical'>('Visual')
   const [goal, setGoal] = useState<'15' | '25' | '45'>('25')
@@ -20,12 +22,22 @@ export default function Settings() {
       <PageHeader title="Settings" sub="Your profile and how your tutor teaches you." />
 
       <Card className="flex items-center gap-4">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo to-violet text-[20px] font-bold text-white">
-          {initials(state.auth.name)}
-        </span>
+        {user?.photoURL != null ? (
+          <img
+            src={user.photoURL}
+            alt=""
+            className="h-14 w-14 shrink-0 rounded-2xl object-cover"
+          />
+        ) : (
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo to-violet text-[20px] font-bold text-white">
+            {initials(user?.name ?? 'Aditya')}
+          </span>
+        )}
         <div className="min-w-0 flex-1">
-          <div className="text-[16px] font-semibold">{state.auth.name}</div>
-          <div className="text-[12.5px] text-ink-soft">Learner · StudyOS</div>
+          <div className="text-[16px] font-semibold">{user?.name ?? 'Aditya'}</div>
+          <div className="truncate text-[12.5px] text-ink-soft">
+            {user?.email ?? (user?.isDemo === true ? 'Demo learner' : 'Learner · StudyOS')}
+          </div>
         </div>
         <span className="flex items-center gap-1.5 rounded-full bg-amber-soft px-3 py-1.5 text-[12px] font-semibold text-amber-ink">
           <Flame size={13} /> 12-day streak
@@ -114,8 +126,7 @@ export default function Settings() {
             variant="secondary"
             size="sm"
             onClick={() => {
-              signOut()
-              navigate('/welcome')
+              void signOut().then(() => navigate('/welcome'))
             }}
           >
             <LogOut size={13} /> Sign out
@@ -142,6 +153,7 @@ export default function Settings() {
           </div>
           <div className="border-t pt-3 text-[11.5px] text-ink-faint">
             StudyOS prototype · v1.0 · “Learn anything. Grow every day.”
+            {live && <span className="block">Accounts secured by Firebase Authentication.</span>}
           </div>
         </Card>
       </section>

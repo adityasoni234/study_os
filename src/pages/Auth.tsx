@@ -6,6 +6,7 @@ import {
   Check,
   Eye,
   EyeOff,
+  Loader2,
   Lock,
   Mail,
   Sparkles,
@@ -13,14 +14,17 @@ import {
 } from 'lucide-react'
 import { Logo } from '@/lib/icons'
 import { Button } from '@/components/ui/Button'
+import { useAuth } from '@/state/AuthContext'
 import { useApp } from '@/state/AppContext'
-import { cn } from '@/lib/utils'
+import { cn, firstName } from '@/lib/utils'
 
 const promises = [
   'A tutor that adapts to your level',
   'Roadmaps that reshape as you learn',
   'Real opportunities, matched to you',
 ]
+
+type Pending = null | 'email' | 'google' | 'demo'
 
 export default function Auth() {
   const [params] = useSearchParams()
@@ -32,20 +36,33 @@ export default function Auth() {
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { state, signIn, toast } = useApp()
+  const [pending, setPending] = useState<Pending>(null)
+
+  const { status, signUp, signIn, signInWithGoogle, continueAsDemo, live } = useAuth()
+  const { toast } = useApp()
   const navigate = useNavigate()
 
-  if (state.auth.authed) return <Navigate to="/" replace />
+  if (status === 'authed') return <Navigate to="/" replace />
 
-  const finish = (displayName: string) => {
-    signIn(displayName)
-    const first = (displayName.trim() || 'Aditya').split(' ')[0]
-    toast(`Welcome, ${first} 🌱`, 'Your learning space is ready.', 'mint')
+  const welcome = (displayName: string) => {
+    toast(`Welcome, ${firstName(displayName)} 🌱`, 'Your learning space is ready.', 'mint')
     navigate('/')
   }
 
-  const submit = () => {
+  const run = async (kind: Exclude<Pending, null>, fn: () => Promise<void>, who: string) => {
     setError(null)
+    setPending(kind)
+    try {
+      await fn()
+      welcome(who)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something interrupted that request.')
+    } finally {
+      setPending(null)
+    }
+  }
+
+  const submitEmail = () => {
     if (mode === 'signup' && name.trim().length < 2) {
       setError('Tell us your name — it makes the tutor friendlier.')
       return
@@ -58,8 +75,15 @@ export default function Auth() {
       setError('Passwords need at least 6 characters.')
       return
     }
-    finish(mode === 'signup' ? name : email.split('@')[0].replace(/[._-]/g, ' '))
+    const who = mode === 'signup' ? name : email.split('@')[0].replace(/[._-]/g, ' ')
+    void run(
+      'email',
+      () => (mode === 'signup' ? signUp(name, email, password) : signIn(email, password)),
+      who,
+    )
   }
+
+  const busy = pending != null
 
   return (
     <div className="flex min-h-dvh bg-paper">
@@ -159,6 +183,7 @@ export default function Auth() {
                   <input
                     id="name"
                     value={name}
+                    autoComplete="name"
                     onChange={(e) => setName(e.target.value)}
                     placeholder="What should your tutor call you?"
                     className="h-full min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-ink-faint"
@@ -176,6 +201,7 @@ export default function Auth() {
                   id="email"
                   type="email"
                   value={email}
+                  autoComplete="email"
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="h-full min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-ink-faint"
@@ -192,8 +218,9 @@ export default function Auth() {
                   id="password"
                   type={showPw ? 'text' : 'password'}
                   value={password}
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                   onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && submit()}
+                  onKeyDown={(e) => e.key === 'Enter' && submitEmail()}
                   placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
                   className="h-full min-w-0 flex-1 bg-transparent text-[14px] outline-none placeholder:text-ink-faint"
                 />
@@ -208,13 +235,25 @@ export default function Auth() {
             </div>
 
             {error != null && (
-              <p className="anim-in rounded-lg bg-coral-soft px-3.5 py-2 text-[12.5px] font-medium text-coral-ink">
+              <p
+                role="alert"
+                className="anim-in rounded-lg bg-coral-soft px-3.5 py-2 text-[12.5px] font-medium text-coral-ink"
+              >
                 {error}
               </p>
             )}
 
-            <Button size="lg" className="w-full" onClick={submit}>
-              {mode === 'signin' ? 'Sign in' : 'Create my account'} <ArrowRight size={15} />
+            <Button size="lg" className="w-full" onClick={submitEmail} disabled={busy}>
+              {pending === 'email' ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  {mode === 'signin' ? 'Signing you in…' : 'Creating your space…'}
+                </>
+              ) : (
+                <>
+                  {mode === 'signin' ? 'Sign in' : 'Create my account'} <ArrowRight size={15} />
+                </>
+              )}
             </Button>
 
             <div className="flex items-center gap-3 py-1">
@@ -223,26 +262,56 @@ export default function Auth() {
               <span className="h-px flex-1 bg-line" />
             </div>
 
+            <button
+              onClick={() => void run('google', signInWithGoogle, 'there')}
+              disabled={busy}
+              className="flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border bg-card text-[13.5px] font-semibold text-ink transition-all hover:border-line-strong disabled:opacity-50"
+            >
+              {pending === 'google' ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden>
+                  <path
+                    fill="#EA4335"
+                    d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2.5 24 .5 14.6.5 6.5 5.9 2.6 13.7l7.8 6.1C12.3 13.7 17.6 9.5 24 9.5z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17.5z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M10.4 28.2c-.5-1.4-.8-2.9-.8-4.5s.3-3.1.8-4.5l-7.8-6.1C.9 16.3 0 20 0 23.7s.9 7.4 2.6 10.6l7.8-6.1z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M24 47.5c6.2 0 11.5-2 15.4-5.6l-7.5-5.8c-2.1 1.4-4.8 2.3-7.9 2.3-6.4 0-11.7-4.2-13.6-10l-7.8 6.1C6.5 42.1 14.6 47.5 24 47.5z"
+                  />
+                </svg>
+              )}
+              Continue with Google
+            </button>
+
             <Button
               size="lg"
               variant="soft"
               className="w-full"
-              onClick={() => finish('Aditya')}
+              disabled={busy}
+              onClick={() => void run('demo', continueAsDemo, 'Aditya')}
             >
-              <Sparkles size={15} /> Continue as demo learner
+              {pending === 'demo' ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Sparkles size={15} />
+              )}
+              Continue as demo learner
             </Button>
-            <button
-              onClick={() =>
-                toast('Single sign-on', 'Google and Apple sign-in arrive with the full release.', 'indigo')
-              }
-              className="h-11 w-full rounded-xl border bg-card text-[13.5px] font-semibold text-ink-soft transition-all hover:border-line-strong hover:text-ink"
-            >
-              Continue with Google
-            </button>
           </div>
 
           <p className="mt-6 text-center text-[11px] leading-relaxed text-ink-faint">
-            Prototype build — your details stay in this browser only.
+            {live
+              ? 'Secured by Firebase Authentication.'
+              : 'Demo mode — your details stay in this browser only.'}
             <br />
             By continuing you agree to learn something new today.
           </p>

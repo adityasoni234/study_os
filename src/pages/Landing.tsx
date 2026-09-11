@@ -19,7 +19,7 @@ import {
 import { Logo } from '@/lib/icons'
 import { Button } from '@/components/ui/Button'
 import { Ring } from '@/components/ui/Progress'
-import { useApp } from '@/state/AppContext'
+import { useAuth } from '@/state/AuthContext'
 import { cn } from '@/lib/utils'
 
 const features = [
@@ -196,8 +196,8 @@ function HeroPreview() {
 }
 
 export default function Landing() {
-  const { state } = useApp()
-  if (state.auth.authed) return <Navigate to="/" replace />
+  const { status } = useAuth()
+  if (status === 'authed') return <Navigate to="/" replace />
 
   return (
     <div className="min-h-dvh bg-paper">

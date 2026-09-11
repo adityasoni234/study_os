@@ -19,7 +19,6 @@ export interface Toast {
 }
 
 interface PersistedState {
-  auth: { authed: boolean; name: string }
   mastery: Record<string, number>
   mission: { learn: boolean; practice: boolean; check: boolean }
   quizzes: QuizRecord[]
@@ -36,7 +35,6 @@ interface PersistedState {
 }
 
 const DEFAULT_STATE: PersistedState = {
-  auth: { authed: false, name: 'Aditya' },
   mastery: { 'precision-recall': 65 },
   mission: { learn: false, practice: false, check: false },
   quizzes: [],
@@ -59,12 +57,7 @@ function loadState(): PersistedState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return DEFAULT_STATE
     const parsed = JSON.parse(raw) as Partial<PersistedState>
-    return {
-      ...DEFAULT_STATE,
-      ...parsed,
-      auth: { ...DEFAULT_STATE.auth, ...parsed.auth },
-      mission: { ...DEFAULT_STATE.mission, ...parsed.mission },
-    }
+    return { ...DEFAULT_STATE, ...parsed, mission: { ...DEFAULT_STATE.mission, ...parsed.mission } }
   } catch {
     return DEFAULT_STATE
   }
@@ -76,8 +69,6 @@ interface AppApi {
   toast: (title: string, desc?: string, tone?: Tone) => void
   dismissToast: (id: string) => void
 
-  signIn: (name: string) => void
-  signOut: () => void
   masteryOf: (topicId: string, fallback?: number) => number
   setMastery: (topicId: string, value: number) => void
   completeMissionStep: (step: 'learn' | 'practice' | 'check') => void
@@ -135,11 +126,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toasts,
       toast,
       dismissToast,
-
-      signIn: (name) =>
-        update((s) => ({ ...s, auth: { authed: true, name: name.trim() || 'Aditya' } })),
-
-      signOut: () => update((s) => ({ ...s, auth: { ...s.auth, authed: false } })),
 
       masteryOf: (topicId, fallback = 0) => state.mastery[topicId] ?? fallback,
 

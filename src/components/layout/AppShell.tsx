@@ -14,7 +14,7 @@ import {
 import { Logo } from '@/lib/icons'
 import { cn, firstName, initials } from '@/lib/utils'
 import { Toasts } from '@/components/ui/Toasts'
-import { useApp } from '@/state/AppContext'
+import { useAuth } from '@/state/AuthContext'
 
 const primaryNav = [
   { to: '/', label: 'Home', icon: Home },
@@ -60,10 +60,10 @@ function SideLink({
 
 export function AppShell() {
   const location = useLocation()
-  const { state } = useApp()
+  const { user } = useAuth()
   const inTutorSession = matchPath('/tutor/:topicId', location.pathname) != null
   const hideMobileChrome = inTutorSession
-  const name = state.auth.name
+  const name = user?.name ?? 'Aditya'
 
   return (
     <div className="min-h-dvh">
