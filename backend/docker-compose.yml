@@ -1,0 +1,44 @@
+# StudyOS backend — Postgres 16 + pgvector, plus the API.
+#
+# NOTE: requirements.txt is deliberately psycopg-free so local SQLite dev stays
+# zero-dependency. Postgres mode needs the driver: the Dockerfile installs
+# `psycopg[binary]` for this stack; if you point a local (non-docker) venv at
+# Postgres, run `pip install "psycopg[binary]"` yourself.
+#
+#   docker compose up --build
+#   → API on http://localhost:8000  (docs at /api/docs)
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: studyos
+      POSTGRES_PASSWORD: studyos
+      POSTGRES_DB: studyos
+    ports:
+      - "5432:5432" # optional: host access for psql/GUI tools
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyos -d studyos"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://studyos:studyos@db:5432/studyos
+      # AI keys pass through from your shell / .env (blank → mock mode).
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_MODE: ${AI_MODE:-auto}
+      APP_ENV: ${APP_ENV:-dev}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
